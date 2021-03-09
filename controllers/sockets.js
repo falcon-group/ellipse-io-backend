@@ -68,14 +68,12 @@ server.of("/customer").use((socket, next) => {
 }).on("connection", (socket) => {
     let user = socket.userId;
     socket.on("monitor", (message) => {
-        console.log("DEFAULT: " + JSON.stringify(message));
         let msg = JSON.parse(JSON.stringify(message));
-        console.log(msg)
+        console.log("MESSAGE" + (typeof message));
+        console.log("MESSAGE" + JSON.stringify(message))
         health_params.createParameter(
             user,
             msg.heartRate, (err, param) => {
-                console.log(err);
-                console.log(param);
                 server.of("/admin").to(user).emit("params", param);
             }
         )
