@@ -11,7 +11,7 @@ exports.loginAdmin = (req, res) => {
     if (!password) {
         return res.status(400).send({"message": "Password can not be empty"});
     }
-    console.log("USERNAME " + password + " PASSWORD " + phone);
+
 
     admin.login(username, password, (err, admin) => {
         if (err) {
@@ -34,15 +34,11 @@ exports.loginAdmin = (req, res) => {
 exports.loginUser = (req, res) => {
     let {phone, password} = req.body;
     if (!phone) {
-        console.log("NO PHONE")
         return res.status(400).send({"message": "Phone can not be empty"});
     }
     if (!password) {
-        console.log("NO PASSWORD")
         return res.status(400).send({"message": "Password can not be empty"});
     }
-    console.log("BODY " + JSON.stringify(req.body));
-    console.log("PASSWORD " + password + " PHONE " + phone);
     users.login(phone, password, (err, user) => {
         if (err) {
             return res.status(401).send(err)

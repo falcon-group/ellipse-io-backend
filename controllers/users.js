@@ -46,8 +46,9 @@ exports.login = (phone, password, callback) => {
         if (error) {
             return callback(error, null)
         }
-        console.log("PASSWORD: " + password);
-        console.log("USER: " + JSON.stringify(user));
+        if (!user) {
+            return callback({message: "Irregular username or password"}, null)
+        }
         if (bcrypt.compareSync(password, user.password)) {
             callback(null, user)
         } else {
