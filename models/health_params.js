@@ -12,6 +12,10 @@ const schema = mongoose.Schema({
     createDate: {
         type: Date,
         required: [true, 'Creation date is Required']
+    },
+    isUrgent: {
+        type: Boolean,
+        default: false
     }
 });
 

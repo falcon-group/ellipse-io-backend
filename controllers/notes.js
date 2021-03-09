@@ -23,7 +23,12 @@ exports.getAllNotes = (customUserId, title, content, offset, limit, callback) =>
     if (content) {
         conditions.content = {"$regex": content, "$options": "i"}
     }
-    Note.find(conditions, {}, {skip: offset, limit: limit}, callback);
+    let options = {
+        skip: offset,
+        limit: limit,
+        sort: {createDate: -1}
+    };
+    Note.find(conditions, {}, options, callback);
 };
 
 exports.updateNote = (noteId, body, callback) => {
