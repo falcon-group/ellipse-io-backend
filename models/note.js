@@ -10,7 +10,8 @@ const schema = mongoose.Schema({
         required: [true, 'Title is required']
     },
     content: {
-        type: String
+        type: String,
+        required: [true, 'Content is required']
     },
     createDate: {
         type: Date,
