@@ -27,7 +27,7 @@ exports.findAllUsers = (phone, customId, limit, offset, callback) => {
     if (customId) {
         conditions.customId = customId;
     }
-    User.find(conditions, userProjection, {skip: offset, limit: limit}, callback);
+    User.find(conditions, {}, {skip: offset, limit: limit}, callback);
 };
 
 exports.updateUser = (id, body, callback) => {
@@ -46,6 +46,8 @@ exports.login = (phone, password, callback) => {
         if (error) {
             return callback(error, null)
         }
+        console.log("PASSWORD: " + password);
+        console.log("USER: " + JSON.stringify(user));
         if (bcrypt.compareSync(password, user.password)) {
             callback(null, user)
         } else {

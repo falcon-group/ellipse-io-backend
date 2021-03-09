@@ -41,6 +41,7 @@ exports.loginUser = (req, res) => {
         console.log("NO PASSWORD")
         return res.status(400).send({"message": "Password can not be empty"});
     }
+    console.log("BODY " + JSON.stringify(req.body));
     console.log("PASSWORD " + password + " PHONE " + phone);
     users.login(phone, password, (err, user) => {
         if (err) {
