@@ -20,7 +20,7 @@ app.use(logger("dev"));
 app.use(cors());
 app.use('/api/user/notes', bodyParser.json(), auth.verifyUserToken, notes);
 app.use('/api/user/health_params', auth.verifyUserToken, healthParams);
-app.use('/api/admin', admin);
+app.use('/api/admin', auth.verifyAdminToken, admin);
 
 app.use('/api/administrator/login', bodyParser.json(), auth.loginAdmin);
 app.use('/api/user/login', bodyParser.json(), auth.loginUser);
