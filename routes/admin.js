@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const notes = require('../controllers/notes');
 const params = require('../controllers/health_params');
 const users = require('./users');
+const tmp = require('tmp');
+const reader = require('xlsx');
 
 router.use(bodyParser.json());
 
@@ -38,6 +40,43 @@ router.get("/health_params", (req, res) => {
             if (err) res.status(500).send(err);
             else res.status(200).send(notes);
         });
+});
+
+router.get("/users/:id/health_params", (req, res) => {
+    const {id} = req.params;
+    let query = req.query || {};
+    tmp.file({postfix: '.xlsx'}, (err, path, fd, cleanupCallback) => {
+        if (err) {
+            cleanupCallback();
+            return res.status(500).send(err);
+        }
+        params.getAllUserParams(id, query.fromDate, query.toDate, (err, params) => {
+            if (err) {
+                cleanupCallback();
+                return res.status(500).send(err);
+            }
+            let users = params.map( item => {
+                return {
+                    "Идентификатор": item._id.toHexString(),
+                    "Пользователь": item.userCustomId,
+                    "Приступ": item.isUrgent,
+                    "Дата": item.createDate,
+                    "Пульс": item.heartRate
+                }
+            })
+            let ws = reader.utils.json_to_sheet(users);
+            let book = reader.utils.book_new();
+            reader.utils.book_append_sheet(book, ws, "Health parameter");
+            reader.writeFile(book, path);
+            res.download(path, err1 => {
+                if (err1) {
+                    res.status(500).send(err1)
+                }
+                cleanupCallback();
+            });
+        });
+    });
+
 });
 
 router.use('/users', users)

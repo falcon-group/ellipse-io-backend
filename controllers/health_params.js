@@ -26,8 +26,27 @@ exports.getAllParameters = (userCustomId, fromDate, toDate, offset, limit, callb
         }
         condition.createDate.$lt = toDate;
     }
-    HealthParameter.find(condition, {}, {skip: offset, limit: limit}, callback);
+    let options = {
+        skip: offset,
+        limit: limit,
+        sort: {createDate: -1}
+    };
+    HealthParameter.find(condition, {}, options, callback);
 };
+
+exports.getAllUserParams = (userCustomId, fromDate, toDate, callback) => {
+    let options = {
+        sort: {createDate: -1}
+    };
+    let condition = {};
+    condition.userCustomId = userCustomId
+    condition.createDate = {};
+    let yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    condition.createDate.$gt = Date.parse(fromDate) || yesterday;
+    condition.createDate.$lt = Date.parse(toDate) || new Date();
+    HealthParameter.find(condition, {}, options, callback)
+}
 
 exports.deleteParameter = (id, callback) => {
     HealthParameter.findOneAndDelete(id, callback);
