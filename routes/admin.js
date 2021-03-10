@@ -44,24 +44,36 @@ router.get("/health_params", (req, res) => {
 
 router.get("/users/:id/health_params", (req, res) => {
     const {id} = req.params;
-    console.log(req.params);
+    let query = req.query || {};
     tmp.file({postfix: '.xlsx'}, (err, path, fd, cleanupCallback) => {
         if (err) {
             cleanupCallback();
             return res.status(500).send(err);
         }
-        params.getAllUserParams(id, (err, params) => {
+        params.getAllUserParams(id, query.fromDate, query.toDate, (err, params) => {
             if (err) {
                 cleanupCallback();
                 return res.status(500).send(err);
             }
-            console.log(params);
-            const ws = reader.utils.json_to_sheet(params, { header: ['Приступ', 'Идентификатор', 'Пользователь', 'Сердечный ритм', 'Дата']});
-            const book = reader.utils.book_new();
+            let users = params.map( item => {
+                return {
+                    "Идентификатор": item._id.toHexString(),
+                    "Пользователь": item.userCustomId,
+                    "Приступ": item.isUrgent,
+                    "Дата": item.createDate,
+                    "Пульс": item.heartRate
+                }
+            })
+            let ws = reader.utils.json_to_sheet(users);
+            let book = reader.utils.book_new();
             reader.utils.book_append_sheet(book, ws, "Health parameter");
             reader.writeFile(book, path);
-            res.download(path)
-            cleanupCallback();
+            res.download(path, err1 => {
+                if (err1) {
+                    res.status(500).send(err1)
+                }
+                cleanupCallback();
+            });
         });
     });
 
