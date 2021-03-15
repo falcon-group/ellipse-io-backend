@@ -9,8 +9,12 @@ exports.createParameter = (customUserId, heartRate, callback) => {
     parameter.save(callback);
 };
 
-exports.getAllParameters = (userCustomId, fromDate, toDate, offset, limit, callback) => {
+exports.getAllParameters = (GMT, userCustomId, fromDate, toDate, offset, limit, callback) => {
     let condition = {};
+    let gmt = Number.parseInt(GMT) || 0;
+    let correctionGmt = gmt * 3600000;
+    let correctedFromDate = Number.parseInt(Date.parse(fromDate).toString()) - correctionGmt;
+    let correctedToDate = Number.parseInt(Date.parse(toDate).toString()) - correctionGmt;
     if (userCustomId) {
         condition.userCustomId = userCustomId;
     }
@@ -18,13 +22,13 @@ exports.getAllParameters = (userCustomId, fromDate, toDate, offset, limit, callb
         if (!condition.createDate) {
             condition.createDate = {};
         }
-        condition.createDate.$gt = fromDate;
+        condition.createDate.$gt = correctedFromDate;
     }
     if (toDate) {
         if (!condition.createDate) {
             condition.createDate = {};
         }
-        condition.createDate.$lt = toDate;
+        condition.createDate.$lt = correctedToDate;
     }
     let options = {
         skip: offset,
@@ -34,17 +38,21 @@ exports.getAllParameters = (userCustomId, fromDate, toDate, offset, limit, callb
     HealthParameter.find(condition, {}, options, callback);
 };
 
-exports.getAllUserParams = (userCustomId, fromDate, toDate, callback) => {
+exports.getAllUserParams = (userCustomId, fromDate, toDate, GMT, callback) => {
     let options = {
         sort: {createDate: -1}
     };
+    let gmt = Number.parseInt(GMT) || 0;
+    let correctionGmt = gmt * 3600000;
+    let correctedFromDate = Number.parseInt(Date.parse(fromDate).toString()) - correctionGmt;
+    let correctedToDate = Number.parseInt(Date.parse(toDate).toString()) - correctionGmt;
     let condition = {};
     condition.userCustomId = userCustomId
     condition.createDate = {};
     let yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    condition.createDate.$gt = Date.parse(fromDate) || yesterday;
-    condition.createDate.$lt = Date.parse(toDate) || new Date();
+    condition.createDate.$gt = correctedFromDate || yesterday;
+    condition.createDate.$lt = correctedToDate || new Date();
     HealthParameter.find(condition, {}, options, callback)
 }
 
