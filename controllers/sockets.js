@@ -69,12 +69,9 @@ server.of("/customer").use((socket, next) => {
     let user = socket.userId;
     socket.on("monitor", (message) => {
         let msg = JSON.parse(message);
-        health_params.createParameter(
-            user,
-            msg.heartRate, (err, param) => {
-                server.of("/admin").to(user).emit("params", param);
-            }
-        )
+        health_params.createParameter(user, msg.heartRate, msg.isUrgent, (err, param) => {
+            server.of("/admin").to(user).emit("params", param);
+        })
     });
 });
 module.exports = server;

@@ -7,9 +7,9 @@ const auth = require('../controllers/auth');
 router.use(bodyParser.json());
 
 router.post("/", (req, res) => {
-    healthParams.createParameter(auth.receivePayload(req).customId, req.body.heartRate, (err, note) => {
+    healthParams.insertParameters(auth.receivePayload(req).customId, req.body, (err, notes) => {
         if (err) res.status(400).send(err);
-        else res.status(201).send(note);
+        else res.status(201).send(notes);
     });
 });
 

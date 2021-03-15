@@ -1,12 +1,21 @@
 const HealthParameter = require('../models/health_params');
 
-exports.createParameter = (customUserId, heartRate, callback) => {
+exports.createParameter = (customUserId, heartRate, isUrgent, callback) => {
     let body = {}
     body.userCustomId = customUserId;
     body.heartRate = heartRate;
-    body.createDate = Date()
+    body.isUrgent = isUrgent;
+    body.createDate = Date();
     let parameter = new HealthParameter(body);
     parameter.save(callback);
+};
+
+exports.insertParameters = (customUserId, items, callback) => {
+    items.forEach(s => {
+        s.userCustomId = customUserId;
+        s.createDate = Date();
+    });
+    HealthParameter.insertMany(items, {}, callback)
 };
 
 exports.getAllParameters = (GMT, userCustomId, fromDate, toDate, offset, limit, callback) => {
