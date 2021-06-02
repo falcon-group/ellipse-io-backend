@@ -1,32 +1,42 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var cors = require('cors');
-const pool = require('generic-pool');;
-var logger = require('morgan');
-const bodyparser = require('body-parser');
+const express = require('express');
+const cors = require('cors');
 
-var mongoose = require('mongoose');
-var authRouter = require('./auth/AuthController');
-var db = require('./config/db');
-console.log("connecting--",db);
+// region setup database
+const mongoose = require('mongoose');
+const auth = require("./controllers/auth");
+const socket = require('./controllers/sockets');
+const db = require('./config/db');
+
 mongoose.connect(db.url); //Mongoose connection created
-var app = express();
-app.use(cors())
-//var mysql = require("mysql");
-app.use(bodyparser.urlencoded({ extended: false }))
 
-app.use(bodyparser.json())
-app.options('*', cors());
+const app = express();
+const notes = require('./routes/notes');
+const admin = require('./routes/admin');
+const healthParams = require('./routes/healt_params');
+const logs = require('./routes/logs');
+const bodyParser = require('body-parser');
+const logger = require('morgan');
 
+app.use(logger("dev"));
+app.use(cors());
+app.use('/api/user/notes', bodyParser.json(), auth.verifyUserToken, notes);
+app.use('/api/user/health_params', auth.verifyUserToken, healthParams);
+app.use('/api/user/logs', auth.verifyUserToken, logs);
+app.use('/api/admin', bodyParser.json(), auth.verifyAdminToken, admin);
 
-app.use('/auth', authRouter);
+app.use('/api/administrator/login', bodyParser.json(), auth.loginAdmin);
+app.use('/api/user/login', bodyParser.json(), auth.loginUser);
 
-//var mysqlConnection = mysql.createConnection('mysql://b3020c234f7bf9:c2f9aeec@eu-cdbr-west-02.cleardb.net/heroku_a055cf7e4179e62?reconnect=true');
-  //  mysqlConnection.connect();
+const port = process.env.PORT || 8080;
+const http = require('http').createServer(app);
 
+http.listen(port, () => {
+    console.log('listening on *:' + port);
+});
 
-const port = process.env.PORT || 3000;
-app.listen(port,()=> console.log(`listen on port ${port}..`));
-
+socket.listen(http, {
+    cors: {
+        origin: '*',
+    },
+    path: "/socket"
+});
